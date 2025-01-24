@@ -1,4 +1,4 @@
-package Main;
+package main;
 
 import java.util.Scanner;
 
@@ -135,6 +135,7 @@ public class tictactoe {
     	thisWin = true;
         for (int i = 0; i < boardsize; i++) {
         	if (board[i][i] != currentPlayer) {
+        		i = boardsize + 1;
 				thisWin = false;
 			}
         }
@@ -144,6 +145,7 @@ public class tictactoe {
     	thisWin = true;
         for (int i = 0; i < boardsize; i++) {
         	if (board[i][boardsize - (i+1)] != currentPlayer) {
+        		i = boardsize + 1;
 				thisWin = false;
 			}
         }
@@ -180,7 +182,7 @@ public class tictactoe {
         return false;
     }
     
-public boolean canLose(int boardsize) {
+    public boolean canLose(int boardsize) {
     	
         // Checks if theres a winning move
     	
@@ -257,10 +259,180 @@ public boolean canLose(int boardsize) {
 		return losingCor;
 		
     }
+    
+    public int[] bestMove(String[][] board, int boardsize, int current) {
+    	
+    	current = current + 1;
+    	
+    	
+    	String[][] bestBoard = new String[boardsize][boardsize];
+    	
+    	for (int i = 0; i < boardsize; i++) {
+    		for (int j = 0; j < boardsize; j++) {
+    			
+    			bestBoard[i][j] = board[i][j];
+    			
+    		}
+    	}
+    	
+    	
+    	int row;
+    	int col;
+    	int[] bestCor = new int[2];
+    	int[] currentCor = new int[2];
+    	
+    	
+    	if(nextWin(boardsize, bestBoard)) {
+    		
+    		
+    		int[] winningCor = winningMove(boardsize);
+    		row = winningCor[0];
+    		col = winningCor[1];
+    		
+    		
+    		while(row < 0 || col < 0 || row >= boardsize || col >= boardsize || bestBoard[row][col] != "-") {
+        		
+        		row = (int)((Math.random()*(boardsize)));
+                col = (int)((Math.random()*(boardsize)));
+
+        	}
+        	
+        	
+            if (row < 0 || col < 0 || row >= boardsize || col >= boardsize || bestBoard[row][col] != "-") {
+                System.out.println("This move is not valid");
+            }
+            
+            bestCor = winningCor;
+    		
+    	}
+    	
+    	else if(nextLose(boardsize, bestBoard)) {
+    		
+    		
+    		//plays move that would make them lose if other player played it
+    		//System.out.println("oooooohhh no!");
+    		int[] losingCor = losingMove(boardsize);
+    		row = losingCor[0];
+    		col = losingCor[1];
+    		
+    		
+    		while(row < 0 || col < 0 || row >= boardsize || col >= boardsize || bestBoard[row][col] != "-") {
+        		
+        		row = (int)((Math.random()*(boardsize)));
+                col = (int)((Math.random()*(boardsize)));
+
+        	}
+        	
+        	
+            if (row < 0 || col < 0 || row >= boardsize || col >= boardsize || bestBoard[row][col] != "-") {
+                System.out.println("This move is not valid");
+            }
+            
+            bestCor = losingCor;
+    		
+    	}
+    	
+    	else {
+    		
+    		row = (int)((Math.random()*(boardsize)));
+            col = (int)((Math.random()*(boardsize)));
+            
+        	
+        	while(row < 0 || col < 0 || row >= boardsize || col >= boardsize || bestBoard[row][col] != "-") {
+        		
+        		row = (int)((Math.random()*(boardsize)));
+                col = (int)((Math.random()*(boardsize)));
+
+        	}
+        	
+        	
+            if (row < 0 || col < 0 || row >= boardsize || col >= boardsize || bestBoard[row][col] != "-") {
+                System.out.println("This move is not valid");
+            }
+            
+            if(current < 2) {
+            	currentCor[0] = row;
+            	currentCor[1] =	col;	
+            }
+            
+
+            bestBoard[row][col] = currentPlayer;
+            
+            //changePlayer();
+                        
+            bestCor = bestMove(bestBoard, boardsize, current);
+            
+            
+    	}
+    	
+
+        //changePlayer();
+        return currentCor;
+        
+    }
+    
+    public boolean nextWin(int boardsize, String[][] bestBoard) {
+    	
+        // Checks if theres a winning move
+    	
+    	boolean thisCanWin = true;
+    	
+    	String[][] winCheckBoard = copyBoard(bestBoard, boardsize);
+    	
+    	thisCanWin = false;
+    	
+        for (int i = 0; i < boardsize; i++) {
+    		for (int j = 0; j < boardsize; j++) {
+    			if (winCheckBoard[i][j] == "-") {
+        			winCheckBoard[i][j] = currentPlayer;
+                }
+    			if (checkForWin(winCheckBoard, boardsize)) {
+    				thisCanWin = true;
+    			} 
+    			winCheckBoard = copyBoard(bestBoard, boardsize);
+    		}
+    	}
+        if (thisCanWin) {
+			return true;
+		}
+        return false;
+    }
+    
+    public boolean nextLose(int boardsize, String[][] bestBoard) {
+    	
+        // Checks if theres a winning move
+    	
+    	boolean thisCanlose = true;
+    	
+    	String[][] loseCheckBoard = copyBoard(bestBoard, boardsize);
+    	
+    	thisCanlose = false;
+    	
+        for (int i = 0; i < boardsize; i++) {
+    		for (int j = 0; j < boardsize; j++) {
+    			changePlayer();
+    			if (loseCheckBoard[i][j] == "-") {
+    				//changePlayer();
+        			loseCheckBoard[i][j] = currentPlayer;
+        			//changePlayer();
+                }
+    			if (checkForWin(loseCheckBoard, boardsize)) {
+    				thisCanlose = true;
+    			} 
+    			loseCheckBoard = copyBoard(bestBoard, boardsize);
+    			changePlayer();
+    		}
+    	}
+        if (thisCanlose) {
+			return true;
+		}
+        return false;
+    }
+    
 
     public void changePlayer() {
         currentPlayer = (currentPlayer == "X") ? "O" : "X";
-    } 
+    }
 
     public void play(int boardsize) {
     	
@@ -328,6 +500,7 @@ public boolean canLose(int boardsize) {
             
             if(vsCpuBool) {
             	
+            	
             	changePlayer();
             	
             	
@@ -377,6 +550,13 @@ public boolean canLose(int boardsize) {
                         System.out.println("This move is not valid");
                         continue;
                     }
+            		
+            	}
+            	
+            	else if(vsCpuBool) {
+            		int[] winningCor = bestMove(board, boardsize, 0);
+            		row = winningCor[0];
+            		col = winningCor[1];
             		
             	}
             	
